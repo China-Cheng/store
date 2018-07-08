@@ -96,7 +96,10 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-        <el-main class="main">内容</el-main>
+        <el-main class="main">
+          <!-- 给匹配路由的占位 -->
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
 </template>
