@@ -21,6 +21,7 @@
 
     <!-- 表格 -->
      <el-table
+      v-loading="loading"
       stripe
       border
       :data="list"
