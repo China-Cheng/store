@@ -18,12 +18,95 @@
         <el-button type="success" plain>添加用户</el-button>
       </el-col>
     </el-row>
+
+    <!-- 表格 -->
+     <el-table
+      stripe
+      border
+      :data="list"
+      style="width: 100%">
+      <el-table-column
+      type="index"
+      width="50">
+      </el-table-column>
+      <el-table-column
+        prop="username"
+        label="姓名"
+        width="100">
+      </el-table-column>
+      <el-table-column
+        prop="email"
+        label="邮箱"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="mobile"
+        label="电话">
+      </el-table-column>
+
+      <el-table-column
+        label="创建日期" >
+        <template slot-scope="scope">
+          {{scope.row.create_time | fmtDate('YYYY-MM-DD')}}
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="用户状态" width="100">
+        <template slot-scope="scope">
+            <el-switch
+              v-model="scope.row.mg_state"
+              active-color="#13ce66"
+              inactive-color="#ff4949">
+            </el-switch>
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="操作">
+        <template slot-scope="scope">
+          <el-row>
+            <el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+            <el-button size="mini" type="danger" icon="el-icon-delete" circle></el-button>
+            <el-button size="mini" type="success" icon="el-icon-check" circle></el-button>
+          </el-row>
+        </template>
+      </el-table-column>
+    </el-table>
  </el-card>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      list: [],
+      loading: true
+    };
+  },
+  created () {
+    this.loadData();
+  },
+  methods: {
+    async loadData () {
+      this.loading = true;
+      const token = sessionStorage.getItem('token');
+      this.$http.defaults.headers.common['Authorization'] = token;
+      const res = await this.$http.get('users?pagenum=1&pagesize=10');
 
+      console.log(res);
+
+      this.loading = false;
+      const data = res.data;
+      const {meta: {msg, status}} = data;
+      if (status === 200) {
+        const {data: {users}} = data;
+        this.list = users;
+      } else {
+        this.$message.error(msg);
+      }
+    }
+  }
 };
 </script>
 
