@@ -68,7 +68,7 @@
         <template slot-scope="scope">
           <el-row>
             <el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete" circle></el-button>
+            <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
             <el-button size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
         </template>
@@ -89,6 +89,7 @@ export default {
     this.loadData();
   },
   methods: {
+    // 查询数据
     async loadData () {
       this.loading = true;
       const token = sessionStorage.getItem('token');
@@ -105,6 +106,22 @@ export default {
         this.list = users;
       } else {
         this.$message.error(msg);
+      }
+    },
+    // 删除数据
+    async handleDelete (id) {
+      if (!confirm('确定删除吗？')) {
+        return;
+      }
+      const res = await this.$http.delete(`users/${id}`);
+      console.log(res);
+      const data = res.data;
+      const { meta: {msg, status} } = data;
+      if (status === 200) {
+        alert(msg);
+        this.loadData();
+      } else {
+        alert(msg);
       }
     }
   }
