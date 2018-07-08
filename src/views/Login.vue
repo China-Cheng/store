@@ -33,12 +33,14 @@ export default {
     async handleLogin() {
       const res = await this.$http.post('login', this.fromData);
       const data = res.data;
-      console.log(data);
       const { meta: { status, msg } } = data;
       if (status === 200) {
         this.$message.success(msg);
+        // 记录
         const { data: { token } } = data;
         sessionStorage.setItem('token', token);
+        // 跳转
+        this.$router.push({name: 'home'});
       } else {
         this.$message.error(msg);
       }
