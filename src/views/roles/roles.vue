@@ -130,8 +130,37 @@ export default {
     },
     // 删除数据
     async handleDelete(id) {
-      const res = await this.$http.delete(`roles/${id}`);
-      console.log(res);
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        // 包裹 await 的函数都需要加上async
+        // 点击确定按钮执行
+        const res = await this.$http.delete(`roles/${id}`);
+
+        // 服务器返回的数据
+        const data = res.data;
+        // meta内部的status和msg
+        const { meta: { status, msg } } = data;
+        if (status === 200) {
+          // 删除成功 重新加载数据
+          this.loadData();
+
+          this.$message({
+            type: 'success',
+            message: msg
+          });
+        } else {
+          this.$message.error(msg);
+        }
+      }).catch(() => {
+        // 点击取消按钮执行
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     }
   }
 };
