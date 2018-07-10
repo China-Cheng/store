@@ -81,11 +81,16 @@
 
     <!-- 添加弹出层 -->
     <el-dialog @close="closeAll" title="添加用户" :visible.sync="userFormVisible">
-        <el-form label-position="right" label-width="120px">
-            <el-form-item label="用户名">
+        <el-form
+        label-position="right"
+        label-width="120px"
+        ref="myform"
+        :model="form"
+        :rules="formRules">
+            <el-form-item label="用户名" prop="username">
                 <el-input v-model="form.username"  auto-complete="off"></el-input>
             </el-form-item>
-            <el-form-item label="密码">
+            <el-form-item label="密码" prop="password">
                 <el-input v-model="form.password" type="password" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="邮箱">
@@ -178,6 +183,17 @@ export default {
         mobile: '',
         region: ''
       },
+      // 表单的验证规则
+      formRules: {
+        username: [
+          { required: true, message: '请输入用户名称', trigger: 'blur' },
+          { min: 1, max: 10, message: '长度在 1 到 10 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
+        ]
+      },
       // 分配角色需要的数据
       currentUserName: '',
       currentUserId: -1,
@@ -247,20 +263,33 @@ export default {
     },
     // 添加数据
     async handelePush () {
-      // 点击确定关闭弹出层
-      this.userFormVisible = false;
-      const res = await this.$http.post('users', this.form);
-      const data = res.data;
-      const {meta: {msg, status}} = data;
-      if (status === 201) {
-        this.$message.success(msg);
-        this.loadData();
-        for (let key in this.formData) {
-          this.formData[key] = '';
+      // 表单的 DOM对象 this.$refs.myform
+      this.$refs.myform.validate(async (valid) => {
+        if (!valid) {
+          return this.$message.error('请完整输入内容');
         }
-      } else {
-        this.$message.error(msg);
-      }
+        // 表单验证成功，添加的操作
+        const res = await this.$http.post('users', this.form);
+
+        // 相当于回调函数中的处理
+        const data = res.data;
+        const { meta: { status, msg } } = data;
+        if (status === 201) {
+          // 添加成功
+          // 隐藏对话框
+          this.userFormVisible = false;
+          // 提示成功
+          this.$message.success(msg);
+          // 重新加载数据
+          this.loadData();
+          // 清空文本框的值
+          // for (let key in this.formData) {
+          //   this.formData[key] = '';
+          // }
+        } else {
+          this.$message.error(msg);
+        }
+      });
     },
     // 编辑页面
     // 拿到Id渲染数据
