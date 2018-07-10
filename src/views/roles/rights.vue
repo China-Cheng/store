@@ -6,13 +6,14 @@
       <el-breadcrumb-item>
         <router-link :to="{ name: 'rights'}">权限管理</router-link>
       </el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+      <el-breadcrumb-item>权限列表</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 表格 -->
     <el-table
       border
       stripe
       class="tb"
+      height="500px"
       :data="list"
       style="width: 100%">
        <el-table-column
