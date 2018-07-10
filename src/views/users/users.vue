@@ -71,7 +71,7 @@
         label="操作">
         <template slot-scope="scope">
           <el-row>
-            <el-button @click="handelePut(scope.row.id)"  size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+            <el-button @click="handelePut(scope.row)"  size="mini" type="primary" icon="el-icon-edit" circle></el-button>
             <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
             <el-button @click="roleFormVisible = true" size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
@@ -80,7 +80,7 @@
     </el-table>
 
     <!-- 添加弹出层 -->
-    <el-dialog title="添加用户" :visible.sync="userFormVisible">
+    <el-dialog @close="closeAll" title="添加用户" :visible.sync="userFormVisible">
         <el-form label-position="right" label-width="120px">
             <el-form-item label="用户名">
                 <el-input v-model="form.username"  auto-complete="off"></el-input>
@@ -102,7 +102,7 @@
     </el-dialog>
 
     <!-- 编辑弹出层 -->
-    <el-dialog title="修改用户" :visible.sync="dialogFormVisible">
+    <el-dialog @close="closeAll" title="修改用户" :visible.sync="dialogFormVisible">
         <el-form label-position="right" label-width="120px" >
             <el-form-item label="用户名">
                 <el-input disabled v-model="form.username"  auto-complete="off"></el-input>
@@ -168,6 +168,7 @@ export default {
       list: [],
       loading: true,
       form: {
+        id: '',
         username: '',
         password: '',
         email: '',
@@ -177,7 +178,6 @@ export default {
       userFormVisible: false,
       dialogFormVisible: false,
       roleFormVisible: false,
-      id: '',
       // 分页相关数据
       // 页码
       pagenum: 1,
@@ -247,32 +247,30 @@ export default {
       if (status === 201) {
         this.$message.success(msg);
         this.loadData();
-        this.form = {
-          username: '',
-          password: '',
-          email: '',
-          mobile: ''
-        };
+        for (let key in this.formData) {
+          this.formData[key] = '';
+        }
       } else {
         this.$message.error(msg);
       }
     },
     // 编辑页面
     // 拿到Id渲染数据
-    async handelePut (id) {
+    handelePut (user) {
       // 因为有作用域，所以把id绑定到Data上,方便给编辑使用
-      this.id = id;
+      console.log(user);
       this.dialogFormVisible = true;
-      const res = await this.$http.get(`users/${id}`);
-      console.log(res);
-      const data = res.data;
-      console.log(data.data);
-      this.form = data.data;
+      this.$http.get(`users/${user.id}`);
+      this.form.username = user.username;
+      this.form.email = user.email;
+      this.form.mobile = user.mobile;
+      this.form.id = user.id;
     },
     // 修改数据
     async handelePuts () {
       this.dialogFormVisible = false;
-      const res = await this.$http.put(`users/${this.id}`, this.form);
+      console.log(this.form);
+      const res = await this.$http.put(`users/${this.form.id}`, this.form);
       const data = res.data;
       const { meta: { status, msg } } = data;
       if (status === 200) {
@@ -300,6 +298,10 @@ export default {
     // 搜索查询
     handleSear() {
       this.loadData();
+    },
+    // 点击弹出框清空内容
+    closeAll() {
+      this.form = {brand_right: 0};
     }
   }
 };
