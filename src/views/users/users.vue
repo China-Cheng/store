@@ -73,7 +73,7 @@
           <el-row>
             <el-button @click="handelePut(scope.row)"  size="mini" type="primary" icon="el-icon-edit" circle></el-button>
             <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-            <el-button @click="roleFormVisible = true" size="mini" type="success" icon="el-icon-check" circle></el-button>
+            <el-button @click="handleEdit(scope.row)" size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
         </template>
       </el-table-column>
@@ -124,20 +124,23 @@
     <el-dialog title="分配角色" :visible.sync="roleFormVisible">
       <el-form :model="form">
         <el-form-item label="当前用户">
-          <el-input v-model="form.name" auto-complete="off"></el-input>
+          {{currentUserName}}
         </el-form-item>
         <el-form-item label="请选择角色">
-          <el-select v-model="form.region" placeholder="请选择角色">
-            <el-option label="主管" value="shanghai"></el-option>
-            <el-option label="总监" value="beijing"></el-option>
-            <el-option label="组长" value="beijing"></el-option>
-            <el-option label="员工" value="beijing"></el-option>
+          <el-select v-model="currentRoleId">
+            <el-option disabled label="请选择" :value="-1"></el-option>
+            <el-option
+            :key="itme.id"
+            v-for="itme in roles"
+            :label="itme.roleName"
+            :value = "itme.id">
+            </el-option>
           </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="roleFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="roleFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="handleSetRole">确 定</el-button>
       </div>
     </el-dialog>
     <!-- @size-change 每页多少条数据发生改变 触发的事件 -->
@@ -175,6 +178,11 @@ export default {
         mobile: '',
         region: ''
       },
+      // 分配角色需要的数据
+      currentUserName: '',
+      currentUserId: -1,
+      currentRoleId: -1,
+      roles: [],
       userFormVisible: false,
       dialogFormVisible: false,
       roleFormVisible: false,
@@ -258,9 +266,7 @@ export default {
     // 拿到Id渲染数据
     handelePut (user) {
       // 因为有作用域，所以把id绑定到Data上,方便给编辑使用
-      console.log(user);
       this.dialogFormVisible = true;
-      this.$http.get(`users/${user.id}`);
       this.form.username = user.username;
       this.form.email = user.email;
       this.form.mobile = user.mobile;
@@ -302,6 +308,40 @@ export default {
     // 点击弹出框清空内容
     closeAll() {
       this.form = {brand_right: 0};
+    },
+    // 点击分配角色
+    async handleEdit(user) {
+      this.roleFormVisible = true;
+      this.currentUserId = user.id;
+      this.currentUserName = user.username;
+      const res = await this.$http.get('roles');
+      this.roles = res.data.data;
+      // 根据用户id查询用户对象，角色id
+      const res1 = await this.$http.get(`users/${user.id}`);
+      this.currentRoleId = res1.data.data.rid;
+    },
+    // 分配角色
+    async handleSetRole() {
+      const res = await this.$http.put(`users/${this.currentUserId}/role`, {
+        rid: this.currentRoleId
+      });
+
+      const data = res.data;
+      const { meta: { status, msg } } = data;
+      if (status === 200) {
+        // 成功
+        // 关闭对话框
+        this.roleFormVisible = false;
+        // 提示
+        this.$message.success(msg);
+        // 重置数据
+        this.currentUserName = '';
+        this.currentUserId = -1;
+        this.currentRoleId = -1;
+      } else {
+        // 失败
+        this.$message.error(msg);
+      }
     }
   }
 };
