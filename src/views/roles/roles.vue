@@ -16,6 +16,50 @@
       border
       :data="list"
       style="width: 100%">
+      <el-table-column type="expand">
+        <template slot-scope="scope">
+          <el-row
+          class="level1"
+          v-for="itme1 in scope.row.children"
+          :key="itme1.id">
+            <!-- 一级权限列表 -->
+            <el-col :span="4">
+              <el-tag @close="hanldeClose(scope.row, item1.id)" closable>{{itme1.authName}}</el-tag>
+              <i class="el-icon-arrow-right"></i>
+            </el-col>
+
+            <el-col :span="20">
+              <!-- 二级权限列表 -->
+              <el-row
+              v-for="itme2 in itme1.children"
+              :key="itme2.id">
+                <el-col :span="4">
+                  <el-tag @close="hanldeClose(scope.row, item2.id)" closable type="success">{{itme2.authName}}</el-tag>
+                  <i class="el-icon-arrow-right"></i>
+
+                </el-col>
+                <el-col :span="20">
+                  <!-- 三级权限列表 -->
+                  <el-tag
+                  @close="hanldeClose(scope.row, item3.id)"
+                  v-for="itme3 in itme2.children"
+                  :key="itme3.id"
+                  type="warning"
+                  closable
+                  class="level3">
+                    {{itme3.authName}}
+                  </el-tag>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
+
+          <!-- 没有权限的时候显示 -->
+          <el-row v-if="scope.row.children.length === 0">
+            <el-col :span="24">未分配权限</el-col>
+          </el-row>
+        </template>
+      </el-table-column>
       <el-table-column
       type="index"
       width="50">
@@ -34,7 +78,7 @@
         label="操作">
         <template slot-scope="scope">
           <el-row>
-            <el-button size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+            <el-button @click="handleEdit(scope.row)" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
             <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
             <el-button size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
@@ -59,6 +103,24 @@
         <div slot="footer" class="dialog-footer">
             <el-button @click="userFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="handelePush">确 定</el-button>
+        </div>
+    </el-dialog>
+     <!-- 编辑弹出层 -->
+    <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
+        <el-form
+        label-position="right"
+        label-width="120px"
+        :model="form">
+            <el-form-item label="角色名称" prop="roleName">
+                <el-input v-model="form.roleName"  auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="角色描述" prop="roleDesc">
+                <el-input v-model="form.roleDesc" auto-complete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="handeleEdit">确 定</el-button>
         </div>
     </el-dialog>
  </el-card>
@@ -86,7 +148,10 @@ export default {
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 3, max: 6, message: '长度在 3 到 6 个字符', trigger: 'blur' }
         ]
-      }
+      },
+      // 编辑弹出框
+      dialogFormVisible: false,
+      roleId: ''
     };
   },
   created() {
@@ -136,9 +201,7 @@ export default {
         type: 'warning'
       }).then(async () => {
         // 包裹 await 的函数都需要加上async
-        // 点击确定按钮执行
         const res = await this.$http.delete(`roles/${id}`);
-
         // 服务器返回的数据
         const data = res.data;
         // meta内部的status和msg
@@ -161,6 +224,38 @@ export default {
           message: '已取消删除'
         });
       });
+    },
+    // 编辑数据渲染
+    async handleEdit(user) {
+      console.log(user);
+      this.dialogFormVisible = true;
+      this.form.roleName = user.roleName;
+      this.form.roleDesc = user.roleDesc;
+      this.roleId = user.id;
+    },
+    // 编辑数据修改
+    async handeleEdit() {
+      console.log(this.form.roleName);
+      const res = await this.$http.put(`roles/${this.roleId}`, this.form);
+      // 解析数据
+      const data = res.data;
+      const { meta: { status, msg } } = data;
+      // 判断
+      if (status === 200) {
+        // 修改成功
+        // 提示成功
+        this.$message.success(msg);
+        // 关闭对话框
+        this.dialogFormVisible = false;
+        // 重新加载列表
+        this.loadData();
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    // 点击删除tag
+    async hanldeClose() {
+      
     }
   }
 };
@@ -174,5 +269,13 @@ export default {
 
 .addRoles {
   margin-top: 10px;
+}
+
+.level3 {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+.level1 {
+  margin-bottom: 10px;
 }
 </style>
