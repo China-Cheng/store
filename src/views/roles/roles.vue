@@ -341,8 +341,8 @@ export default {
       });
 
       const { meta: { status, msg } } = resData;
-      if (stats === 200) {
-        this.dialogFormVisible = false;
+      if (status === 200) {
+        this.dialogVisible = false;
         this.$message.success(msg);
         this.loadData();
       } else {
