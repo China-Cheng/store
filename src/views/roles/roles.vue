@@ -24,7 +24,7 @@
           :key="itme1.id">
             <!-- 一级权限列表 -->
             <el-col :span="4">
-              <el-tag @close="hanldeClose(scope.row, item1.id)" closable>{{itme1.authName}}</el-tag>
+              <el-tag @close="hanldeClose(scope.row, itme1.id)" closable>{{itme1.authName}}</el-tag>
               <i class="el-icon-arrow-right"></i>
             </el-col>
 
@@ -34,15 +34,15 @@
               v-for="itme2 in itme1.children"
               :key="itme2.id">
                 <el-col :span="4">
-                  <el-tag @close="hanldeClose(scope.row, item2.id)" closable type="success">{{itme2.authName}}</el-tag>
+                  <el-tag @close="hanldeClose(scope.row, itme2.id)" closable type="success">{{itme2.authName}}</el-tag>
                   <i class="el-icon-arrow-right"></i>
 
                 </el-col>
                 <el-col :span="20">
                   <!-- 三级权限列表 -->
                   <el-tag
-                  @close="hanldeClose(scope.row, item3.id)"
                   v-for="itme3 in itme2.children"
+                  @close="hanldeClose(scope.row, itme3.id)"
                   :key="itme3.id"
                   type="warning"
                   closable
@@ -80,7 +80,7 @@
           <el-row>
             <el-button @click="handleEdit(scope.row)" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
             <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-            <el-button size="mini" type="success" icon="el-icon-check" circle></el-button>
+            <el-button @click="dialogVisible = true" size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
         </template>
       </el-table-column>
@@ -123,6 +123,27 @@
             <el-button type="primary" @click="handeleEdit">确 定</el-button>
         </div>
     </el-dialog>
+    <!-- 分配权限对话框  -->
+    <el-dialog
+      @open="handleOpenDialog"
+      title="分配权限"
+      :visible.sync="dialogVisible">
+      <el-tree
+      ref="tree"
+      v-loading="loadingTree"
+      :data="treeData"
+      :props="defaultProps"
+      node-key="id"
+      :default-checked-keys="checkedList"
+      show-checkbox
+      default-expand-all>
+      </el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
  </el-card>
 </template>
 
@@ -151,7 +172,16 @@ export default {
       },
       // 编辑弹出框
       dialogFormVisible: false,
-      roleId: ''
+      roleId: '',
+      // 控制分配权限的对话框
+      dialogVisible: false,
+      // 绑定tree所需要的数据
+      treeData: [],
+      // 配置要展示数据中的那个属性
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      }
     };
   },
   created() {
@@ -254,8 +284,24 @@ export default {
       }
     },
     // 点击删除tag
-    async hanldeClose() {
-      
+    async hanldeClose(role, rightId) {
+      const { data: resData } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`);
+      const { data, meta: { status, msg } } = resData;
+      if (status === 200) {
+        // 成功
+        this.$message.success(msg);
+        // 重新绑定当前角色的children 权限
+        role.children = data;
+      } else {
+        // 失败
+        this.$message.error(msg);
+      }
+    },
+    // 点击获取权限列表选择项
+    async handleOpenDialog() {
+      const { data: resData } = await this.$http.get('rights/tree');
+      const { data } = resData;
+      thi.streeData = data;
     }
   }
 };
