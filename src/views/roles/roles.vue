@@ -80,7 +80,7 @@
           <el-row>
             <el-button @click="handleEdit(scope.row)" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
             <el-button @click="handleDelete(scope.row.id)" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-            <el-button @click="dialogVisible = true" size="mini" type="success" icon="el-icon-check" circle></el-button>
+            <el-button @click="handleShowRightsDialog(scope.row)" size="mini" type="success" icon="el-icon-check" circle></el-button>
           </el-row>
         </template>
       </el-table-column>
@@ -130,8 +130,7 @@
       :visible.sync="dialogVisible">
       <el-tree
       ref="tree"
-      v-loading="loadingTree"
-      :data="treeData"
+      :data="streeData"
       :props="defaultProps"
       node-key="id"
       :default-checked-keys="checkedList"
@@ -140,7 +139,7 @@
       </el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="handleSeRights">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -176,12 +175,16 @@ export default {
       // 控制分配权限的对话框
       dialogVisible: false,
       // 绑定tree所需要的数据
-      treeData: [],
+      streeData: [],
       // 配置要展示数据中的那个属性
       defaultProps: {
         children: 'children',
         label: 'authName'
-      }
+      },
+      // 获取要选择的节点id
+      checkedList: [],
+      // 记录row.id，方便要修改
+      currentRoleId: ''
     };
   },
   created() {
@@ -301,7 +304,50 @@ export default {
     async handleOpenDialog() {
       const { data: resData } = await this.$http.get('rights/tree');
       const { data } = resData;
-      thi.streeData = data;
+      this.streeData = data;
+    },
+    // 点击按钮显示分配权限对话框
+    async handleShowRightsDialog(role) {
+      // 记录角色id， 分配权限的时候使用
+      this.currentRoleId = role.id;
+
+      this.dialogVisible = true;
+      // 获取当前角色所拥有的权限的id
+
+      // 遍历一级权限
+      const arr = [];
+      role.children.forEach((item1) => {
+        // arr.push(item1.id);
+        // 遍历二级权限
+        item1.children.forEach((item2) => {
+          // arr.push(item2.id);
+          // 遍历三级权限
+          item2.children.forEach((item3) => {
+            arr.push(item3.id);
+          });
+        });
+      });
+      this.checkedList = arr;
+    },
+    // 点击确定分配权限
+    async handleSeRights() {
+      // 获取全选和半选的id
+      const checkedKeys = this.$refs.tree.getCheckedKeys();
+      const halfCheckedKeys = this.$refs.tree.getHalfCheckedKeys();
+      const newArray = [...checkedKeys, ...halfCheckedKeys];
+
+      const { data: resData } = await this.$http.post(`roles/${this.currentRoleId}/rights`, {
+        rids: newArray.join(',')
+      });
+
+      const { meta: { status, msg } } = resData;
+      if (stats === 200) {
+        this.dialogFormVisible = false;
+        this.$message.success(msg);
+        this.loadData();
+      } else {
+        this.$message.error(msg);
+      }
     }
   }
 };
