@@ -63,16 +63,16 @@ export default {
   created() {
     this.loadData();
   },
-  // 判断是否登录
-  beforeCreate() {
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-      // 如果没有返回登录页
-      this.$router.push({name: 'login'});
-      // 提示
-      this.$message.warning('请先登录');
-    }
-  },
+  // // 判断是否登录
+  // beforeCreate() {
+  //   const token = sessionStorage.getItem('token');
+  //   if (!token) {
+  //     // 如果没有返回登录页
+  //     this.$router.push({name: 'login'});
+  //     // 提示
+  //     this.$message.warning('请先登录');
+  //   }
+  // },
   methods: {
     handleLogout() {
       sessionStorage.clear();
