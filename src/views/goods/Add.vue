@@ -5,14 +5,17 @@
     <!-- 面包屑 -->
     <my-breadcrumb level1="商品管理" level2="商品分类"></my-breadcrumb>
       <!-- 步骤条 -->
-      <el-steps :active="0" finish-status="success" align-center>
+      <el-steps :active="stepActive" finish-status="success" align-center>
         <el-step title="基本信息"></el-step>
         <el-step title="商品图片"></el-step>
         <el-step title="商品内容"></el-step>
       </el-steps>
       <!-- 标签页 -->
-      <el-tabs tab-position="left">
-        <el-tab-pane label="基本信息">
+      <el-tabs
+      @tab-click="handleTabClick"
+      tab-position="left"
+      v-model="activeName">
+        <el-tab-pane label="基本信息" name="0">
           <el-form ref="form" :model="form" label-width="80px" label-position="top">
             <el-form-item label="商品名称">
               <el-input v-model="form.goods_name"></el-input>
@@ -35,12 +38,18 @@
               @gaibianle="handleGaiBianLe"></CategoryCascader>
             </el-form-item>
             <el-form-item>
-
+              <el-button @click="handleNextShep" type="primary">下一步</el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="商品图片">配置管理</el-tab-pane>
-        <el-tab-pane label="商品内容">
+        <el-tab-pane label="商品图片" name="1">商品图片
+          <el-row>
+            <el-col :spam="4">
+              <el-button @click="handleNextShep" type="primary">下一步</el-button>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
+        <el-tab-pane label="商品内容" name="2">
           <quill-editor
             v-model="form.goods_introduce"
             ref="myQuillEditor">
@@ -72,7 +81,10 @@ export default {
         goods_number: '',
         goods_cat: '',
         goods_introduce: ''
-      }
+      },
+      // 标签页
+      activeName: '0',
+      stepActive: 0
     };
   },
   methods: {
@@ -91,6 +103,15 @@ export default {
     },
     handleGaiBianLe(data) {
       this.form.goods_cat = data.join(',');
+    },
+    // 点击切换下一页
+    handleNextShep() {
+      this.activeName = Number.parseInt(this.activeName) + 1 + '';
+      this.stepActive++;
+    },
+    // 标签页按钮
+    handleTabClick(tab, evnet) {
+      this.stepActive = tab.index - 0;
     }
   },
   components: {
