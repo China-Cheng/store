@@ -35,19 +35,32 @@
               @gaibianle="handleGaiBianLe"></CategoryCascader>
             </el-form-item>
             <el-form-item>
-              <el-button @click="handleAdd" type="primary">立即创建</el-button>
-              <el-button>取消</el-button>
+
             </el-form-item>
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="商品图片">配置管理</el-tab-pane>
-        <el-tab-pane label="商品内容">角色管理</el-tab-pane>
+        <el-tab-pane label="商品内容">
+          <quill-editor
+            v-model="form.goods_introduce"
+            ref="myQuillEditor">
+          </quill-editor>
+          <el-row>
+            <el-col :span="4">
+              <el-button @click="handleAdd" type="primary">立即创建</el-button>
+            </el-col>
+          </el-row>
+         </el-tab-pane>
       </el-tabs>
   </el-card>
 </template>
 
 <script>
 import CategoryCascader from '@/components/CategoryCascader';
+import 'quill/dist/quill.core.css';
+import 'quill/dist/quill.snow.css';
+import 'quill/dist/quill.bubble.css';
+import { quillEditor } from 'vue-quill-editor';
 
 export default {
   data() {
@@ -58,12 +71,13 @@ export default {
         goods_weight: '',
         goods_number: '',
         goods_cat: '',
+        goods_introduce: ''
       }
-    }
+    };
   },
   methods: {
     async handleAdd() {
-     const { data: resData } = await this.$http({
+      const { data: resData } = await this.$http({
         url: 'goods',
         data: this.form,
         method: 'post'
@@ -80,7 +94,8 @@ export default {
     }
   },
   components: {
-    CategoryCascader
+    CategoryCascader,
+    quillEditor
   }
 };
 </script>
