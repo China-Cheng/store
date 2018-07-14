@@ -1,7 +1,7 @@
 <template>
   <el-card class="box-card">
     <!-- 面包屑 -->
-    <!-- <my-breadcrumb level1="商品管理" level2="商品分类"></my-breadcrumb> -->
+    <my-breadcrumb level1="商品管理" level2="商品分类"></my-breadcrumb>
 
     <el-row class="row-add">
       <el-col :span="24">
@@ -140,7 +140,7 @@ export default {
       selectedOptions2: [],
       options: [],
       // 编辑弹框
-      editDiaLogFormVisible: false,
+      editDiaLogFormVisible: false
      };
   },
   created() {
