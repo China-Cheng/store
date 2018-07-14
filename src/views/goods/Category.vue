@@ -1,11 +1,11 @@
 <template>
   <el-card class="box-card">
     <!-- 面包屑 -->
-    <my-breadcrumb level1="商品管理" level2="商品分类"></my-breadcrumb>
+    <!-- <my-breadcrumb level1="商品管理" level2="商品分类"></my-breadcrumb> -->
 
     <el-row class="row-add">
       <el-col :span="24">
-        <el-button type="success" plain>添加分类</el-button>
+        <el-button @click="handleShowAdd" type="success" plain>添加分类</el-button>
       </el-col>
     </el-row>
 
@@ -55,8 +55,8 @@
       <el-table-column
         label="操作">
         <template slot-scope="scope">
-          <el-button plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
-          <el-button plain size="mini" type="danger" icon="el-icon-delete" ></el-button>
+          <el-button @click="handleShowEdit(scope.row)" plain size="mini" type="primary" icon="el-icon-edit" ></el-button>
+          <el-button @click="handleDelete(scope.row)" plain size="mini" type="danger" icon="el-icon-delete" ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -71,6 +71,47 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total">
     </el-pagination>
+
+    <!-- 添加表单 -->
+    <el-dialog title="添加商品分类" :visible.sync="addDiaLogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="分类名称" label-width="100px">
+          <el-input v-model="form.cat_name" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="分类名称" label-width="100px">
+            <div class="block">
+              <el-cascader
+                expand-trigger="hover"
+                change-on-select
+                :options="options"
+                v-model="selectedOptions2"
+                :props="{
+                  label: 'cat_name',
+                  value: 'cat_id',
+                  children: 'children'
+                }">
+              </el-cascader>
+            </div>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDiaLogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAdd">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 添加表单 -->
+    <el-dialog title="编辑商品分类" :visible.sync="editDiaLogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="分类名称" label-width="100px">
+          <el-input v-model="form.cat_name" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editDiaLogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleEdit">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -88,8 +129,19 @@ export default {
       // 分页数据
       pagenum: 1,
       pagesize: 5,
-      total: 0
-    };
+      total: 0,
+      // 添加框
+      addDiaLogFormVisible: false,
+      // 添加数据
+      form: {
+        cat_name: ''
+      },
+      // 级联选择器
+      selectedOptions2: [],
+      options: [],
+      // 编辑弹框
+      editDiaLogFormVisible: false,
+     };
   },
   created() {
     this.loadData();
@@ -99,7 +151,6 @@ export default {
     async loadData() {
       this.loading = true;
       const { data: resData } = await this.$http.get(`categories?type=3&pagenum=${this.pagenum}&pagesize=${this.pagesize}`);
-
       this.loading = false;
 
       const { data: { result, total } } = resData;
@@ -111,12 +162,66 @@ export default {
     handleSizeChange(val) {
       this.pagesize = val;
       this.loadData();
-      console.log(`每页 ${val} 条`);
     },
     handleCurrentChange(val) {
       this.pagenum = val;
       this.loadData();
-      console.log(`当前页: ${val}`);
+    },
+    // 添加表单显示框
+    async handleShowAdd() {
+      this.addDiaLogFormVisible = true;
+      const res = await this.$http.get('categories?type=' + 2);
+      this.options = res.data.data;
+    },
+    // 添加数据
+    async handleAdd() {
+      const formData = {
+        ...this.form,
+        cat_pid: this.selectedOptions2[this.selectedOptions2.length - 1],
+        cat_level: this.selectedOptions2.length
+      };
+      const res = await this.$http({
+        url: 'categories',
+        method: 'post',
+        data: formData
+      });
+      const { meta: { status, msg } } = res.data;
+      if (status === 201) {
+        this.$message.success(msg);
+        this.loadData();
+        this.addDiaLogFormVisible = false;
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    // 删除数据
+    async handleDelete(row) {
+      const res = await this.$http.delete(`categories/${row.cat_id}`);
+      const { data: {meta: {status, msg}} } = res;
+      if (status === 200) {
+        this.$message.success(msg);
+        this.loadData();
+      } else {
+        this.$message.error(msg);
+      }
+    },
+    // 编辑弹框
+    handleShowEdit(row) {
+      this.editDiaLogFormVisible = true;
+      this.form = row;
+    },
+    // 编辑数据
+    async handleEdit() {
+      const { cat_id, cat_name } = this.form;
+      const { data: resData } = await this.$http.put(`categories/${cat_id}`, {cat_name: cat_name});
+      const { meta: { status, msg } } = resData;
+      if (status === 200) {
+        this.$message.success(msg);
+        this.loadData();
+        this.editDiaLogFormVisible = false;
+      } else {
+        this.$message.error(msg);
+      }
     }
   },
   components: {
