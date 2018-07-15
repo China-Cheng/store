@@ -9,6 +9,7 @@ import '@/assets/css/style.css';
 import MyAxios from '@/piugins/MyAxios';
 import moment from 'moment';
 import MyBreadcrumb from '@/components/MyBreadcrumb';
+import 'nprogress/nprogress.css';
 
 Vue.config.productionTip = false;
 // 注册全局组件

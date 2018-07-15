@@ -1,4 +1,5 @@
 import axios from 'axios';
+import NProgress from 'nprogress';
 
 var MyAxios = {};
 MyAxios.install = function (Vue) {
@@ -13,6 +14,7 @@ MyAxios.install = function (Vue) {
   // Add a request interceptor
   // 添加请求的拦截器
   instance.interceptors.request.use(function (config) {
+    NProgress.start();
     // 请求被发送之前要做的处理
     // Do something before request is sent
     // console.log('拦截器', config);
@@ -34,7 +36,7 @@ MyAxios.install = function (Vue) {
   // 添加响应的拦截器
   instance.interceptors.response.use(function (response) {
     // Do something with response data
-
+    NProgress.done();
     return response;
   }, function (error) {
     // Do something with response error

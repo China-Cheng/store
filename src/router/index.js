@@ -10,6 +10,8 @@ import Category from '@/views/goods/Category';
 import GoodsList from '@/views/goods/List';
 import GoodsAdd from '@/views/goods/Add';
 import OrderList from '@/views/orders/List';
+import Reports from '@/views/repots/Index';
+import NProgress from 'nprogress';
 
 Vue.use(Router);
 
@@ -59,6 +61,11 @@ const router = new Router({
           name: 'order-list',
           path: 'orders',
           component: OrderList
+        },
+        {
+          name: 'reports',
+          path: 'reports',
+          component: Reports
         }
       ]
     }
@@ -67,6 +74,8 @@ const router = new Router({
 
 // 路由的前置守卫
 router.beforeEach((to, from, next) => {
+
+  NProgress.start();
   // console.log(to, from);
   // 判断当前访问的路由是否是login，如果是login直接next
   if (to.name === 'login') {
@@ -83,6 +92,9 @@ router.beforeEach((to, from, next) => {
     }
     next();
   }
+  router.afterEach((to, from) => {
+    NProgress.done();
+  });
 });
 
 export default router;
