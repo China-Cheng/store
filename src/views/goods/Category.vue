@@ -141,7 +141,7 @@ export default {
       options: [],
       // 编辑弹框
       editDiaLogFormVisible: false
-     };
+    };
   },
   created() {
     this.loadData();
@@ -212,8 +212,9 @@ export default {
     },
     // 编辑数据
     async handleEdit() {
-      const { cat_id, cat_name } = this.form;
-      const { data: resData } = await this.$http.put(`categories/${cat_id}`, {cat_name: cat_name});
+      const { catId, catName } = this.form;
+      console.log(this.form);
+      const { data: resData } = await this.$http.put(`categories/${catId}`, {cat_name: catName});
       const { meta: { status, msg } } = resData;
       if (status === 200) {
         this.$message.success(msg);
