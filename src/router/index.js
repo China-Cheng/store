@@ -1,17 +1,18 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Login from '@/views/Login';
-import Home from '@/views/Home';
-import Users from '@/views/users/users';
-import Rights from '@/views/roles/rights';
-import Roles from '@/views/roles/roles';
 import { Message } from 'element-ui';
-import Category from '@/views/goods/Category';
-import GoodsList from '@/views/goods/List';
-import GoodsAdd from '@/views/goods/Add';
-import OrderList from '@/views/orders/List';
-import Reports from '@/views/repots/Index';
-import NProgress from 'nprogress';
+
+const Login = () => import('@/views/Login');
+const Home = () => import('@/views/Home');
+const Users = () => import('@/views/users/users');
+const Rights = () => import('@/views/roles/rights');
+const Roles = () => import('@/views/roles/roles');
+const Category = () => import('@/views/goods/Category');
+const GoodsList = () => import('@/views/goods/List');
+const GoodsAdd = () => import('@/views/goods/Add');
+const OrderList = () => import('@/views/orders/List');
+const Reports = () => import('@/views/repots/Index');
+const NProgress = () => import('nprogress');
 
 Vue.use(Router);
 
