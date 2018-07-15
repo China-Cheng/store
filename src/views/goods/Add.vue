@@ -116,7 +116,7 @@ export default {
       header: {
         Authorization: window.sessionStorage.getItem('token')
       },
-      fileList2: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}]
+      fileList2: []
     };
   },
   methods: {
@@ -147,7 +147,13 @@ export default {
     },
     // 图片上传事件
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      const index = this.form.pics.findIndex(function (itme, index) {
+        return itme.pic === file.response.data.tmp_path;
+      });
+      if (index !== -1) {
+        this.form.pics.splice(index, 1);
+        this.$message.success('删除成功');
+      }
     },
     handlePreview(file) {
       console.log(file);
