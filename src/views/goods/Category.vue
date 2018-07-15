@@ -83,6 +83,8 @@
               <el-cascader
                 expand-trigger="hover"
                 change-on-select
+                clearable
+                placeholder="默认一级分类添加"
                 :options="options"
                 v-model="selectedOptions2"
                 :props="{
@@ -175,9 +177,13 @@ export default {
     },
     // 添加数据
     async handleAdd() {
+      let tobal = 0;
+      if (this.selectedOptions2[0]) {
+        tobal = this.selectedOptions2[this.selectedOptions2.length - 1];
+      };
       const formData = {
         ...this.form,
-        cat_pid: this.selectedOptions2[this.selectedOptions2.length - 1],
+        cat_pid: tobal,
         cat_level: this.selectedOptions2.length
       };
       const res = await this.$http({
